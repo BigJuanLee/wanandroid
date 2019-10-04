@@ -40,7 +40,7 @@ export default {
   methods: {
     getLatestList() {
       this.axios
-        .get("/api/article/list/0/json")
+        .get("/article/list/0/json")
         .then(res => {
           this.lastestList = res.data.data.datas;
         })

@@ -18,7 +18,7 @@ export default {
     login() {
       this.axios
         .post(
-          `/api/user/login?username=${this.$refs.username.value}&password=${this.$refs.password.value}`
+          `/user/login?username=${this.$refs.username.value}&password=${this.$refs.password.value}`
         )
         .then(res => {
           if (res.data.errorMsg) {

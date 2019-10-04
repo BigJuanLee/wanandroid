@@ -35,7 +35,7 @@ export default {
       if (document.cookie.length > 0) {
         if (this.$route.path == "/myCollection") {
           this.axios
-            .post(`/api/lg/uncollect/${id}/json?originId=${oId}`)
+            .post(`/lg/uncollect/${id}/json?originId=${oId}`)
             .then(() => {
               this.reload();
             })
@@ -43,14 +43,14 @@ export default {
         } else {
           if (list.collect) {
             this.axios
-              .post(`/api/lg/uncollect_originId/${id}/json`)
+              .post(`/lg/uncollect_originId/${id}/json`)
               .then(() => {
                 this.reload();
               })
               .catch(error => error);
           } else {
             this.axios
-              .post(`/api/lg/collect/${this.id}/json`)
+              .post(`/lg/collect/${this.id}/json`)
               .then(() => {
                 this.reload();
               })

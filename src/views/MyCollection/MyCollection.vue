@@ -36,7 +36,7 @@ export default {
     },
     getCollectList() {
       this.axios
-        .get(`/api/lg/collect/list/0/json`)
+        .get(`/lg/collect/list/0/json`)
         .then(res => {
           this.collectList = res.data.data.datas;
           this.collectList.map(item => {
@@ -46,8 +46,8 @@ export default {
         .catch(error => error);
     },
     cancleCollect(id, oId) {
-      this.axios.post(`/api/lg/uncollect/${id}/json?orginId=${oId}`).then(() => {
-        console.log(1);
+      this.axios.post(`/lg/uncollect/${id}/json?orginId=${oId}`).then(() => {
+
       }).catch(error => error)
     }
   },

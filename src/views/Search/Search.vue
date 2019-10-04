@@ -46,7 +46,7 @@ export default {
     },
     search() {
       this.axios
-        .post(`/api/article/query/0/json/?k=${this.name}`)
+        .post(`/article/query/0/json/?k=${this.name}`)
         .then(res => {
           this.list = res.data.data.datas;
         })
@@ -54,7 +54,7 @@ export default {
     },
     getBeforeArticle() {
       this.axios
-        .post(`/api/article/query/${this.pageNum}/json/?k=${this.name}`)
+        .post(`/article/query/${this.pageNum}/json/?k=${this.name}`)
         .then(res => {
           this.beforeArticle.push(...res.data.data.datas);
         })

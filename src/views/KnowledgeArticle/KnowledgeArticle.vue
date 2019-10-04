@@ -48,7 +48,7 @@ export default {
     //根据导航条的id获取对应的文章
     getArticle(id) {
       this.axios
-        .get(`/api/article/list/0/json?cid=${id}`)
+        .get(`/article/list/0/json?cid=${id}`)
         .then(res => {
           this.articleList = res.data.data.datas;
         })
@@ -57,7 +57,7 @@ export default {
     //下滑加载之前的文章
     getBeforeArticle(id) {
       this.axios
-        .get(`/api/article/list/${this.pageNum}/json?cid=${id}`)
+        .get(`/article/list/${this.pageNum}/json?cid=${id}`)
         .then(res => {
           this.beforeArticle.push(...res.data.data.datas);
         })

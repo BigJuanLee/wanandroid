@@ -26,7 +26,7 @@ export default {
     register() {
       this.axios
         .post(
-          `/api/user/register?username=${this.$refs.username.value}&password=${this.$refs.password.value}&repassword=${this.$refs.repeat.value}`
+          `/user/register?username=${this.$refs.username.value}&password=${this.$refs.password.value}&repassword=${this.$refs.repeat.value}`
         )
         .then(res => {
           if (res.data.errorMsg) {

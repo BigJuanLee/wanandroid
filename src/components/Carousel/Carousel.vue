@@ -25,7 +25,7 @@ export default {
   methods: {
     getBannerMsg() {
       this.axios
-        .get("/api/banner/json")
+        .get("/banner/json")
         .then(res => {
           this.banner = res.data.data;
           this.length = res.data.data.length;

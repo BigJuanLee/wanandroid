@@ -44,7 +44,7 @@ export default {
   methods: {
     getHotKey() {
       this.axios
-        .get(`/api/hotkey/json`)
+        .get(`/hotkey/json`)
         .then(res => {
           this.hotKey = res.data.data;
         })
@@ -52,7 +52,7 @@ export default {
     },
     getFriendlyLink() {
       this.axios
-        .get(`/api/friend/json`)
+        .get(`/friend/json`)
         .then(res => {
           this.friendlyLink = res.data.data;
         })

@@ -10,6 +10,12 @@ Vue.component('Tabs', Tabs)
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 
+if(process.env.NODE_ENV == 'development') {
+  axios.defaults.baseURL = '/api/'
+}else {
+  axios.defaults.baseURL = 'https://www.wanandroid.com/'
+}
+
 new Vue({
   router,
   store,

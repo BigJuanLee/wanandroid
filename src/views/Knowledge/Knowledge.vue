@@ -36,7 +36,7 @@ export default {
     //获取体系数据
     getSystemList() {
       this.axios
-        .get("/api/tree/json")
+        .get("/tree/json")
         .then(res => {
           this.knowledgeList = res.data.data;
         })
