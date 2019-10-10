@@ -13,7 +13,7 @@ Vue.config.productionTip = false
 if(process.env.NODE_ENV == 'development') {
   axios.defaults.baseURL = '/api/'
 }else {
-  axios.defaults.baseURL = 'https://www.wanandroid.com/'
+  axios.defaults.baseURL = '/api/'
 }
 
 new Vue({
