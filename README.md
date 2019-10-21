@@ -104,7 +104,7 @@ location /api {
 			proxy_set_header  X-Real_IP  $remote_addr;
 		}
 ```
-然后在main.js里面就不用分开发环境和生产环境了，直接把axios.defaults.baseURL设置成/api，然后开启一下nginx服务就成功解决这个跨域问题了！！大功告成，百度上很少有解决生产环境下的跨域问题，当初找了很久试了很多都不行，心灰意冷下找了一个前端大手子帮我解决了！！
+然后在main.js里面就不用分开发环境和生产环境了，直接把axios.defaults.baseURL设置成/api，然后开启一下nginx服务，把打包好的dist文件夹丢到nginx的根目录下就成功解决这个跨域问题了，如果是在本地想尝试一下效果，就打开localhost:80，如果像我这样放到服务器上，就需要买一个服务器，然后把配置好的nginx文件夹整个上传到服务器，接着打开服务器的公网ip就可以看到效果了。大功告成！！！
 
 
 ### 目前已知的问题
