@@ -1,7 +1,7 @@
 wanandroid
 ==========
 
-使用vue开发的一款玩安卓web app，样式是参考我朋友用安卓做的那款app(呃，其实就是仿制他的，不过他是用安卓写的，我用vue写的)。这是我作为一个初学者练手的项目吧，目前主要功能都仿制出来了，感觉大功告成先记录下来，写一点制作过程，和遇到的问题总结一下，剩余一些例如元素的出现动画啊，一些bug还没改，暂时先放放，以后再改。
+使用vue开发的一款玩安卓web app，样式是参考我朋友用安卓做的那款app(呃，其实就是仿制他的，不过他是用安卓写的，我用vue写的)。这是我作为一个初学者练手的项目吧，目前主要功能都仿制出来了，感觉大功告成先记录下来，写一点制作过程，和遇到的问题总结一下。
 
     项目地址: https://github.com/BigJuanLee/wanandroid
     演示地址: 122.51.23.54
@@ -20,7 +20,7 @@ wanandroid
 
 * vue+vue-router，比起vue全家桶单独少了一个vuex，因为我看介绍说如果您的应用够简单，您最好不要使用 Vuex，而我的确实很简单，所以就没用，第二就是没熟(不)练(会)，(我会看文档逐步尝试学习的)。  
 
-* 插件，normalize.css，vue-axios。其他例如轮播图插件啊，滑动插件，postcss自适应插件，这些都没用。本着能手写就不用插件的精神，后面就后悔了，后面再说为什么。
+* 插件，normalize.css，vue-axios。其他例如轮播图插件啊，滑动插件，postcss自适应插件，这些都没用。本着能手写就不用插件的精神，后面就后悔了。
 
 ### 制作过程
     
@@ -47,7 +47,27 @@ https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于�
 然后请求的时候就改成this.axios.get(`/api/...`)这样，在开发环境下应该是没问题了，注意只是在开发环境下，打包之后在生产环境依然会有问题，这下面再说。
 
 
-首页的轮播图，首先通过axios获取了banner的数据后，用v-for生成若干个li，然后在data里写一个cuerrentIndex，用定时器每次把这个currentIndex加一，当然加到最后一张的时候要把这个currentIndex设置成第一张的下标，接着li里面用v-show，只有当v-for的index和这个currentIndex相等，才让这个li显示，这样大概就轮起来了。然而这样轮的话会一闪而过，毫无动画效果，这时用transtion-group包围这些li，然后写一点过渡效果就行了。这就做完一个简易的轮播图。翻开vue官网列表过渡那页有详细的解释, https://cn.vuejs.org/v2/guide/transitions.html#%E6%A6%82%E8%BF%B0 这个是地址。
+### 首页
+![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/home.png)
+
+首页的轮播图，首先通过axios获取了banner的数据后，用v-for生成若干个li，然后在data里设置一个cuerrentIndex=0用于记录当前图片的索引，用定时器把这个索引逐次加一，加到li的长度减一，也就是最后一张图片的索引的时候，设置成0。接着li里面设置v-show="index == currentIndex"，只有当v-for的index和这个currentIndex相等，才让这个li显示，这样大概就轮起来了。然而这样轮的话，图片会一闪而过，毫无动画效果。这时用<transtion-group></transtion-group>包住li，设置transtion-group的name为...，以便后面用于写过渡效果，设置tag为ul，这样transtion-group就会渲染成ul。然后添上过渡效果就行了。
+```
+.list-enter-active {
+    transform: translateX(0);
+    transition: all 1s ease-in-out;
+  }
+  .list-leave-active {
+    transform: translateX(-100%);
+    transition: all 1s ease-in-out;
+  }
+  .list-enter {
+    transform: translateX(100%);
+  }
+  .list-leave {
+    transform: translateX(0);
+  }
+```
+这就做完一个简易的轮播图。 https://cn.vuejs.org/v2/guide/transitions.html#%E6%A6%82%E8%BF%B0 这个是vue过渡动画详细用法的介绍。
 
 
 首页下面的列表和其他很多页面都很类似。
@@ -59,21 +79,25 @@ https://www.wanandroid.com/article/list/0/json
 他接口是这个样子的一开始this.axios.get(.../0/...)这样，然后v-for出来，没问题。后面做加载更多功能，就需要在data里设置一个pageNum，设置成1吧，然后写一个方法，里面的0就换成${this.pageNum}，每次滑到底部调用这个方法，就把pageNun加一就行了。怎样判断滑到底部，wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight这样，wrapper是你滑动的区域，我用$refs获取了这个区域，虽然vue不建议这样直接操作dom，但是暂时找不到其他方法。
 
 
-在knowledge页面下有很多列表项，然后点击这些列表会进入新的页面，而这个新的页面的标题和导航是根据knowledge的列表项的数据而变化的。我最初想到的是路由传参，就是
+### 知识体系页面和文章页
+![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/knowledge.png)
+![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/k-article.png)
+
+点击知识体系页面下面每一个列表，是要跳转到新的一个页面，这里暂时叫做文章页。这个文章页的顶部的标题，和导航都是根据知识体系页的内容来显示的。所以一开始最先想到的是用路由传参，就像下面这样。
 ```
 this.$router.push({
         name: ...,
         params: ...
       });
 ```
-name要对应params，path对应另外一个忘了。然后跳转的页面就用this.$route.params接收。这样导致的后果就是，如果这个新的页面刷新了，就会一点数据都没了。
-解决方法，不用路由传参，用sessionStorage。在跳转的时候sessionStorage.setItem('...', JSON.stringify(...))，把数据放入本地储存，在新的页面JSON.parse(sessionStorage.getItem('...'))接收，这样就没问题了，因为那个...应该是一个对象，所以必须转化成字符串才能传过去，接收就用对应的方法把字符串转回对象就能使用了。
+跳转的页面就用this.$route.params接收，这样导致的后果就是，如果这个文章页刷新了，就会一点数据都没了。
+解决方法，不用路由传参，用sessionStorage。在跳转的时候sessionStorage.setItem('...', JSON.stringify(...))，把数据放入本地储存，在文章页用JSON.parse(sessionStorage.getItem('...'))接收，这样就没问题了，因为那个...应该是一个对象，所以必须转化成字符串才能传过去，接收就用对应的方法把字符串转回对象就能使用了。
+文章页有个小问题就是，每次拉到最底下，pageNum都会变大，而切换的时候，需要把pageNum初始化一下，不然继续下拉就获取不到数据了。
 
 
-在刚才那个新页面下，有个导航栏，对应下面相应的列表。如果每次拉到最底下，那个pageNum就会加到很大，而切换导航的时候，再继续往下拉，因为pageNum已经变大了，所以可能会获取不到数据，这是需要每次切换的时候把pageNum初始化一下。
+### 生产环境下的问题
 
-
-打包之后，我尝试放到github pages上面，然而他报了一个404错误，长时间百度过后，得出的结论是，在生产环境下axios.get(/api/...)里面的api不会帮我转化成https://www.wanandroid.com 所以找不到路径。所以我在main.js里设置了axios.defaults.baseURL，如果是开发环境呢，就等于/api，如果是生产环境呢，就等于https://www.wanandroid.com 然后各个页面的this.axios(/api/...)就把/api去掉，去掉的话，404的问题是解决了，然而在这个生产环境下还是会有跨域问题，很气！百度推荐过很多方法，有叫后端开个权限的，但是我并不认识这个后端，有叫用jsonp的，但是jsonp不支持post，而且我用get的时候也不行，不知道为什么。最后用了nginx，下载完nginx后，改一下conf里面的nginx.conf文件
+打包之后，我尝试放到github pages上面，然而他报了一个404错误，长时间百度过后，得出的结论是，在生产环境下axios.get(/api/...)里面的api不会帮我转化成https://www.wanandroid.com 所以找不到路径。所以我在main.js里设置了axios.defaults.baseURL。如果是开发环境呢，就等于/api，如果是生产环境呢，就等于https://www.wanandroid.com 然后各个页面的this.axios(/api/...)就把/api去掉。去掉的话，404的问题是解决了，然而在这个生产环境下还是会有跨域问题，很气！百度推荐过很多方法，有叫后端开个权限的，但是我并不认识这个后端，有叫用jsonp的，但是jsonp不支持post，而且我用get的时候也不行，不知道为什么，还有叫装一款插件的，忘了叫什么了，试过都不行。最后用了nginx(其实nginx一开始也不行，我开启不了服务，无论是双击exe还是通过命令行的方式都不行，一个大手子把他的nginx压缩包给我就行了)。下载完nginx后，改一下conf里面的nginx.conf文件
 ```
 location /api {
 			proxy_pass  https://www.wanandroid.com/;
@@ -83,7 +107,27 @@ location /api {
 然后在main.js里面就不用分开发环境和生产环境了，直接把axios.defaults.baseURL设置成/api，然后开启一下nginx服务就成功解决这个跨域问题了！！大功告成，百度上很少有解决生产环境下的跨域问题，当初找了很久试了很多都不行，心灰意冷下找了一个前端大手子帮我解决了！！
 
 
+### 目前已知的问题
+
+* 点击跳转到外部链接后，点击浏览器的返回键，底部的tab栏有时会对应不上。
+
+* 点击收藏按钮的时候，页面必须刷新一下才能看见心形图标变蓝，用户体验不好。
+
+* axios请求大概的逻辑差不多，应该封装一下。
+
+* 判断登录好像有点不严谨。
+
+* 没用路由守卫，需要先登录才能进入的页面部分的代码可以优化。
+
+* 用手机体验首页存在加载不了更多的bug。
+
+* 用手机需要输入的时候，输入法会把页面挤变形。
+
+* 轮播图太简易了。
+
+* 退出登录功能没做。
+
+* 元素的出现动画没做，一些点击动画也没做
+
 ### 最后
-
-据我所知的问题啊，因为有些列表项点击会跳到外部的链接，在跳到外部链接后，再点击浏览器的返回键，底部的导航栏有时会对应不上相应的页面。收藏问题，这个心形按钮的颜色是根据后端的boolean值决定的，我点击后boolean值确实会改变，但不会实时更新，所以我每次点击强行刷新了一下页面，用户体验很差。登录的问题，没用路由守卫，还有判断是否在登录写得不严谨。好多好多问题，慢慢再修改吧，这个先当做是1.0版本。
-
+哇，总结了好多问题和bug，或许还有我不知道的。之前还做了一款知乎日报，用了better-scroll，丝般顺滑，无论在pc端还是移动端都毫无问题，这次尝试不用插件在移动端就出现了预期之外的问题，而且没什么头绪。还有轮播图也太简单了，明明有很多插件可以用的，都没用。我想如果在工作之中的话，还是要以完成任务为先，能用插件就用插件了，自己写的话，一是没别人好，二是写得慢，只有在平时自己做着玩的时候才手写吧。
