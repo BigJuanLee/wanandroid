@@ -48,7 +48,7 @@ export default {
     },
     getBeforeList() {
       this.axios
-        .get(`/api/article/list/${this.listNum}/json`)
+        .get(`/article/list/${this.listNum}/json`)
         .then(res => {
           this.beforeList.push(...res.data.data.datas);
         })

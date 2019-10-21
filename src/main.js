@@ -10,11 +10,7 @@ Vue.component('Tabs', Tabs)
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 
-if(process.env.NODE_ENV == 'development') {
-  axios.defaults.baseURL = '/api/'
-}else {
-  axios.defaults.baseURL = '/api/'
-}
+axios.defaults.baseURL = '/api/'
 
 new Vue({
   router,
