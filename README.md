@@ -24,7 +24,7 @@ wanandroid
 
 ### 制作过程
     
-https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于获取数据啊，做登录注册收藏各种功能。有了数据接口就可以同过axios.get(...).then(...).catch(...)这样拿到数据，然后在then里做想做的操作，最后catch里面返回一下错误，基本是这个套路。然而如果要在vue里用axios的话，除了install之外，还要在每个需要用的页面里import一下，很麻烦，所以这里用了vue-axios。安装完axios和vue-axios之后，在main.js里面import一下，接着Vue.use(VueAxios, axios)，就可以在每个页面this.axios.get(...)这样使用了，应该是方便了很多。
+https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于获取数据啊，做登录注册收藏各种功能。有了数据接口就可以通过axios.get(...).then(...).catch(...)这样拿到数据，然后在then里做想做的操作，最后catch里面返回一下错误，基本是这个套路。然而如果要在vue里用axios的话，除了install之外，还要在每个需要用的页面里import一下，很麻烦，所以这里用了vue-axios。安装完axios和vue-axios之后，在main.js里面import一下，接着Vue.use(VueAxios, axios)，就可以在每个页面this.axios.get(...)这样使用了，应该是方便了很多。
     
     
 如果在每个页面获取数据的时候(随便选了一个接口)，直接this.axios.get(`https://www.wanandroid.com/article/list/0/json`)是不行的，会报一个跨域的错误，解决方法是在项目的根目录下新建一个vue.config.js的文件，然后里面配置一下
@@ -50,7 +50,7 @@ https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于�
 ### 首页
 ![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/home.png)
 
-首页的轮播图，首先通过axios获取了banner的数据后，用v-for生成若干个li，然后在data里设置一个cuerrentIndex=0用于记录当前图片的索引，用定时器把这个索引逐次加一，加到li的长度减一，也就是最后一张图片的索引的时候，设置成0。接着li里面设置v-show="index == currentIndex"，只有当v-for的index和这个currentIndex相等，才让这个li显示，这样大概就轮起来了。然而这样轮的话，图片会一闪而过，毫无动画效果。这时用<transtion-group></transtion-group>包住li，设置transtion-group的name为...，以便后面用于写过渡效果，设置tag为ul，这样transtion-group就会渲染成ul。然后添上过渡效果就行了。
+首页的轮播图，首先通过axios获取了banner的数据后，用v-for生成若干个li，然后在data里设置一个cuerrentIndex=0用于记录当前图片的索引，用定时器把这个索引逐次加一，加到li的长度减一，也就是最后一张图片的索引的时候，设置成0。接着li里面设置v-show="index == currentIndex"，只有当v-for的index和这个currentIndex相等，才让这个li显示，这样大概就轮起来了。然而这样轮的话，图片会一闪而过，毫无动画效果。这时用transtion-group包住li，设置transtion-group的name为...，以便后面用于写过渡效果，设置tag为ul，这样transtion-group就会渲染成ul。然后添上过渡效果就行了。
 ```
 .list-enter-active {
     transform: translateX(0);
@@ -76,7 +76,35 @@ https://www.wanandroid.com/article/list/0/json
 方法：GET
 参数：页码，拼接在连接中，从0开始。
 ```
-他接口是这个样子的一开始this.axios.get(.../0/...)这样，然后v-for出来，没问题。后面做加载更多功能，就需要在data里设置一个pageNum，设置成1吧，然后写一个方法，里面的0就换成${this.pageNum}，每次滑到底部调用这个方法，就把pageNun加一就行了。怎样判断滑到底部，wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight这样，wrapper是你滑动的区域，我用$refs获取了这个区域，虽然vue不建议这样直接操作dom，但是暂时找不到其他方法。
+他接口是这个样子的。只需要写好其中一个列表项的样式，用this.axios.get(.../0/...)这样拿到数据后保存在data里面，就用v-for循环创建出来，没问题。后面做加载更多功能，就需要在data里设置一个pageNum，设置成1吧，然后写一个方法，里面的0就换成${this.pageNum}，每次滑到底部调用这个方法，就把pageNun加一就行了。怎样判断滑到底部，wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight这样，wrapper是你滑动的区域，我用$refs获取了这个区域，虽然vue不建议这样直接操作dom，但是暂时找不到其他方法。
+
+```
+getLatestList() {
+      this.axios
+        .get("/article/list/0/json")
+        .then(res => {
+          this.lastestList = res.data.data.datas;
+        })
+        .catch(error => error);
+    },
+    getBeforeList() {
+      this.axios
+        .get(`/article/list/${this.listNum}/json`)
+        .then(res => {
+          this.beforeList.push(...res.data.data.datas);
+        })
+        .catch(error => error);
+      this.listNum++;
+    }
+    
+    handleScroll() {
+      let wrapper = this.$refs.wrapper;
+      if (wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight) {
+        this.getBeforeList();
+      }
+    }
+
+```
 
 
 ### 知识体系页面和文章页
