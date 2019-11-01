@@ -1,7 +1,7 @@
 wanandroid
 ==========
 
-使用vue开发的一款玩安卓web app，样式是参考我朋友用安卓做的那款app(呃，其实就是仿制他的，不过他是用安卓写的，我用vue写的)。这是我作为一个初学者练手的项目吧，目前主要功能都仿制出来了，感觉大功告成先记录下来，写一点制作过程，和遇到的问题总结一下。
+  使用vue开发的一款玩安卓web app，样式是参考我朋友用安卓做的那款app(呃，其实就是仿制他的，不过他是用安卓写的，我用vue写的)。这是我作为一个初学者练手的项目吧，目前主要功能都仿制出来了，感觉大功告成先记录下来，写一点制作过程，和遇到的问题总结一下。
 
     项目地址: https://github.com/BigJuanLee/wanandroid
     演示地址: 122.51.23.54（快过期了），106.53.4.5（这个还有三个月，今天是2019.11.2）
@@ -24,10 +24,13 @@ wanandroid
 
 ### 制作过程
     
-https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于获取数据啊，做登录注册收藏各种功能。有了数据接口就可以通过axios.get(...).then(...).catch(...)这样拿到数据，然后在then里做想做的操作，最后catch里面返回一下错误，基本是这个套路。然而如果要在vue里用axios的话，除了install之外，还要在每个需要用的页面里import一下，很麻烦，所以这里用了vue-axios。安装完axios和vue-axios之后，在main.js里面import一下，接着Vue.use(VueAxios, axios)，就可以在每个页面this.axios.get(...)这样使用了，应该是方便了很多。
+  https://www.wanandroid.com/blog/show/2 
+	
+		
+  这个是玩安卓开放的api，用于获取数据啊，做登录注册收藏各种功能。有了接口之后，就可以使用axios发起请求啦。首先要安装axios，在项目的终端输入 npm install axios。然后哪个页面需要用到的话，就在那里import一下，就可以使用了，但是这样太麻烦，如果很多个页面用到就需要import很多次。所以用到了vue-axios,同样先安装一下,npm install --save vue-axios，然后在main.js里面import，最后Vue.use(VueAxios, axios)这样，每次需要使用，就可以直接this.axios...这样使用了，不用再import了，方便了一些。
     
-    
-如果在每个页面获取数据的时候(随便选了一个接口)，直接this.axios.get(`https://www.wanandroid.com/article/list/0/json`)是不行的，会报一个跨域的错误，解决方法是在项目的根目录下新建一个vue.config.js的文件，然后里面配置一下
+  在请求数据的时候，这里随便选了一个接口，直接this.axios.get(`https://www.wanandroid.com/article/list/0/json`)是不行的，会报一个跨域的错误。解决方法是在项目的根目录下新建一个vue.config.js的文件，然后里面配置一下，然后请求的时候就改成this.axios.get(`/api/...`)这样，在开发环境下应该是没问题了。而在生产环境依旧是存在跨域问题的，也就是打包之后。
+  
 ```module.exports = {
     publicPath: './',
     devServer: {
@@ -44,39 +47,66 @@ https://www.wanandroid.com/blog/show/2 这个是玩安卓开放的api，用于�
     }
 }
 ```
-然后请求的时候就改成this.axios.get(`/api/...`)这样，在开发环境下应该是没问题了，注意只是在开发环境下，打包之后在生产环境依然会有问题，这下面再说。
+
 
 
 ### 首页
 ![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/home.png)
 
-首页的轮播图，首先通过axios获取了banner的数据后，用v-for生成若干个li，然后在data里设置一个cuerrentIndex=0用于记录当前图片的索引，用定时器把这个索引逐次加一，加到li的长度减一，也就是最后一张图片的索引的时候，设置成0。接着li里面设置v-show="index == currentIndex"，只有当v-for的index和这个currentIndex相等，才让这个li显示，这样大概就轮起来了。然而这样轮的话，图片会一闪而过，毫无动画效果。这时用transtion-group包住li，设置transtion-group的name为...，以便后面用于写过渡效果，设置tag为ul，这样transtion-group就会渲染成ul。然后添上过渡效果就行了。
+  首页有个手写的简易（陋）的轮播图，思路是用v-show搭配定时器，然后切换的时候用一点过渡动画。首先通过axios获取的图片的数据，保存在data里面的一个数组里，通过v-for循环创建出相应的图片，然后在data里设置一个索引，用定时器逐次加一，再把v-show的条件设为data里的索引和v-for的索引相等，这样轮播图就轮起来了。但是这样每次轮的时候会一闪而过，这时添加点过渡动画就可以了。
+  
+```
+<transition-group name="list" tag="ul" class="container">
+      <li v-for="(item, index) in banner" :key="'li' + index" v-show="index == currentIndex">
+        <img :src="item.imagePath" alt />
+        <div class="desc">{{item.title}}</div>
+      </li>
+</transition-group>
+
+```
+
+```
+
+move() {
+      setInterval(() => {
+        this.currentIndex++;
+        if (this.currentIndex > this.length - 1) {
+          this.currentIndex = 0;
+        }
+      }, 2000);
+    }
+
+```
+
+  
 ```
 .list-enter-active {
     transform: translateX(0);
     transition: all 1s ease-in-out;
   }
-  .list-leave-active {
+.list-leave-active {
     transform: translateX(-100%);
     transition: all 1s ease-in-out;
   }
-  .list-enter {
+.list-enter {
     transform: translateX(100%);
   }
-  .list-leave {
+.list-leave {
     transform: translateX(0);
   }
 ```
-这就做完一个简易的轮播图。 https://cn.vuejs.org/v2/guide/transitions.html#%E6%A6%82%E8%BF%B0 这个是vue过渡动画详细用法的介绍。
 
 
-首页下面的列表和其他很多页面都很类似。
+
+  首页下面的列表和其他几个页面的列表很相似，所以只要写好其中一个列表项的样式抽成组件，在需要用到的地方使用v-for就组成了列表，然后传递不同的数据就可以了。
+
 ```
 https://www.wanandroid.com/article/list/0/json
 方法：GET
 参数：页码，拼接在连接中，从0开始。
 ```
-他接口是这个样子的。只需要写好其中一个列表项的样式，用this.axios.get(.../0/...)这样拿到数据后保存在data里面，就用v-for循环创建出来，没问题。后面做加载更多功能，就需要在data里设置一个pageNum，设置成1吧，然后写一个方法，里面的0就换成${this.pageNum}，每次滑到底部调用这个方法，就把pageNun加一就行了。怎样判断滑到底部，wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight这样，wrapper是你滑动的区域，我用$refs获取了这个区域，虽然vue不建议这样直接操作dom，但是暂时找不到其他方法。
+
+  接口是这个样子的，每次拉到最底下，再请求这个接口，然后把页码的参数加一，就可以做成上滑加载更多的功能了。判断一个滑动区域拉到最底的条件是 wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight，这个wrapper要有一个高度，而且overflow要设置成scroll，然后wrapper的内容超出wrapper的时候，就可以开始滑动了。
 
 ```
 getLatestList() {
@@ -86,8 +116,8 @@ getLatestList() {
           this.lastestList = res.data.data.datas;
         })
         .catch(error => error);
-    },
-    getBeforeList() {
+},
+getBeforeList() {
       this.axios
         .get(`/article/list/${this.listNum}/json`)
         .then(res => {
@@ -95,44 +125,67 @@ getLatestList() {
         })
         .catch(error => error);
       this.listNum++;
-    }
+}
     
-    handleScroll() {
+handleScroll() {
       let wrapper = this.$refs.wrapper;
       if (wrapper.scrollHeight - wrapper.scrollTop === wrapper.clientHeight) {
         this.getBeforeList();
       }
-    }
+}
 
 ```
 
 
 ### 知识体系页面和文章页
+
 ![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/knowledge.png)
 ![image](https://github.com/BigJuanLee/wanandroid/blob/master/screenshot/k-article.png)
 
-点击知识体系页面下面每一个列表，是要跳转到新的一个页面，这里暂时叫做文章页。这个文章页的顶部的标题，和导航都是根据知识体系页的内容来显示的。所以一开始最先想到的是用路由传参，就像下面这样。
+  点击知识体系页面下面每一个列表，是要跳转到新的一个页面，这里叫做文章页。这个文章页的顶部的标题，和导航都是根据知识体系页的内容来显示的。所以一开始最先想到的是用路由传参，但是用路由传参的话，文章页一刷新就什么数据都没有了。所以改用了本地储存sessionStorage，注意点是，sessionStorage.setItem只能存字符串格式，但是这里需要穿过去的是一个对象，所以传的时候要把对象转为字符串，接受的时候再转回对象使用。还有一点就是，文章页有个上滑加载功能，还有切换功能，切换的时候要把页码的参数初始化一下，不然切换到第二页因为页码不是从0开始，就算再怎么下拉有时会加载不出来数据。
+
 ```
-this.$router.push({
-        name: ...,
-        params: ...
+toKnowledgeArtcile(list) {
+      sessionStorage.setItem('list', JSON.stringify(list));
+      this.$router.push({
+        name: "knowledgeArticle",
+        // params: list
       });
+}
 ```
-跳转的页面就用this.$route.params接收，这样导致的后果就是，如果这个文章页刷新了，就会一点数据都没了。
-解决方法，不用路由传参，用sessionStorage。在跳转的时候sessionStorage.setItem('...', JSON.stringify(...))，把数据放入本地储存，在文章页用JSON.parse(sessionStorage.getItem('...'))接收，这样就没问题了，因为那个...应该是一个对象，所以必须转化成字符串才能传过去，接收就用对应的方法把字符串转回对象就能使用了。
-文章页有个小问题就是，每次拉到最底下，pageNum都会变大，而切换的时候，需要把pageNum初始化一下，不然继续下拉就获取不到数据了。
+
+```
+setParams() {
+      // this.list = this.$route.params; 这种方式刷新页面会导致获取不到list，因此把list放在缓存里
+      this.list = JSON.parse(sessionStorage.getItem('list'));//储存对象时要把对象转为字符串，获取再转回json
+},
+```
+
+```
+clear() {
+      this.beforeArticle.length = 0;
+      this.pageNum = 1;
+}
+```
+
+制作的难点好像就这些，主要还是跨域的问题。
 
 
-### 生产环境下的问题
+### 生产环境下的跨域问题
 
-打包之后，我尝试放到github pages上面，然而他报了一个404错误，长时间百度过后，得出的结论是，在生产环境下axios.get(/api/...)里面的api不会帮我转化成https://www.wanandroid.com 所以找不到路径。所以我在main.js里设置了axios.defaults.baseURL。如果是开发环境呢，就等于/api，如果是生产环境呢，就等于https://www.wanandroid.com 然后各个页面的this.axios(/api/...)就把/api去掉。去掉的话，404的问题是解决了，然而在这个生产环境下还是会有跨域问题，很气！百度推荐过很多方法，有叫后端开个权限的，但是我并不认识这个后端，有叫用jsonp的，但是jsonp不支持post，而且我用get的时候也不行，不知道为什么，还有叫装一款插件的，忘了叫什么了，试过都不行。最后用了nginx(其实nginx一开始也不行，我开启不了服务，无论是双击exe还是通过命令行的方式都不行，一个大手子把他的nginx压缩包给我就行了)。下载完nginx后，改一下conf里面的nginx.conf文件
+  当项目做的差不多，打包好想然后给别人演示。一开始我是想丢到github page上面，结果发现报了一个404的错误。经过多方查证和百度过后，得出的结论是，在生产环境下，axios请求的时候没有帮我把/api/转化成我在vue.config.js设置的那样。所以一开始想到的是，手动设置开发环境和生产环境下的请求路径，在main.js里面设置axios.defaults.baseURL，如果是开发环境，就等于/api/，如果是生产环境，就等于 https://www.wanandroid.com/ ，然后各个页面下的axios请求就把/api/去掉。这样是成功解决了404的问题，但是随之而来又报了跨域的错，很气！！！
+  
+  然后再次经过多方查证和百度过后，发现是生产环境下的跨域问题，而百度上解决这个问题的方案很多，我尝试过最后成功的就只有一个，就是使用nginx。要去nginx官网下载一个最新版本，然后修改一下conf文件夹里面的nginx.conf配置，接着把打包好的dist文件夹丢到nginx文件夹根目录下，开启服务，大功告成！！！
+  
+  小插曲，其实一开始用nginx，死活开启不了服务，无论通过命令行还是双击exe都不行，任务管理器依旧没这个进程。后来找到一个大手子，他发了他的nginx压缩包给我就能开启服务了，很奇怪。然后解决了这个跨域问题的目的是想演示，我就买了个服务器，然后把整个配置好的nginx文件夹，包括已经把dist包也放进去这样，整个复制到了服务器上，然后输入公网ip就能演示了，建议用谷歌浏览器打开然后按一下f12。至于为什么一开始是说要用github page，后面又突然使用了服务器，因为大手子说服务器好啊，直接丢到服务器上就能演示了，就听了他的话......毕竟这个生产环境下的跨域问题不是我自己解决的，我尝试了百度上很多办法，例如jsonp，或者下载些什么插件统统不行，万念俱灰就快放弃的时候大手子拯救了我，所以我很相信他的话。就是这样
+  
 ```
 location /api {
-			proxy_pass  https://www.wanandroid.com/;
-			proxy_set_header  X-Real_IP  $remote_addr;
-		}
+	proxy_pass  https://www.wanandroid.com/;
+	proxy_set_header  X-Real_IP  $remote_addr;
+}
 ```
-然后在main.js里面就不用分开发环境和生产环境了，直接把axios.defaults.baseURL设置成/api，然后开启一下nginx服务，把打包好的dist文件夹丢到nginx的根目录下就成功解决这个跨域问题了，如果是在本地想尝试一下效果，就打开localhost:80，如果像我这样放到服务器上，就需要买一个服务器，然后把配置好的nginx文件夹整个上传到服务器，接着打开服务器的公网ip就可以看到效果了。大功告成！！！
+
 
 
 ### 目前已知的问题
