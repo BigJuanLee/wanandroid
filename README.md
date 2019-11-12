@@ -8,7 +8,7 @@ wanandroid
 
 ### 查看效果	
 
-   下载压缩包后，解压，把解压后的文件夹拖到vscode里，按ctrl+tab上面那一点打开终端，然后依次输入
+   下载压缩包后，解压，把解压后的文件夹拖到vscode里，按ctrl+shift+tab上面那一点打开终端，然后依次输入
 
     npm install
     
