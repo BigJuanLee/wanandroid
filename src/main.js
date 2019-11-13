@@ -12,6 +12,20 @@ Vue.config.productionTip = false
 
 axios.defaults.baseURL = '/api/'
 
+router.beforeEach((to, from, next) => {
+  if(to.meta.needLogin) {
+    if(localStorage.getItem("token")) {
+      next();
+    } else {
+      next({
+        name: 'login'
+      })
+    }
+  } else {
+    next();
+  }
+})
+
 new Vue({
   router,
   store,

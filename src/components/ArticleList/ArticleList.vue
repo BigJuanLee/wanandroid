@@ -32,7 +32,7 @@ export default {
   components: {},
   methods: {
     collection(list, id, oId) {
-      if (document.cookie.length > 0) {
+      if (localStorage.getItem("token") === "0") {
         if (this.$route.path == "/myCollection") {
           this.axios
             .post(`/lg/uncollect/${id}/json?originId=${oId}`)

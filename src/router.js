@@ -52,7 +52,10 @@ export default new Router({
     {
       path: "/myCollection",
       name: 'myCollection',
-      component: MyCollection
+      component: MyCollection,
+      meta: {
+        needLogin: true
+      }
     },
     {
       path: "/test",
