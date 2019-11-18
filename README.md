@@ -202,7 +202,7 @@ location /api {
 
 ### 登录权限的问题
 
-  有两个地方需要判断是否登录。一个是点击列表项的收藏按钮时，另一个是点击我的收藏，进入收藏页之前需要判断。登录成功后，会返回一串cookies，我一开始的写的判断条件是document.cookie.length > 0，只要浏览器有cookies，就算是他登录了，后来发现这样不严谨。所以改成了用localstorage。在登录成功后，把他返回的cookies里面的errorCode存到localstorage里面，然后在点击收藏按钮的方法里判断一下这个errorCode是不是等于"0"就可以了。而进入收藏页的判断则是使用了导航守卫。首先在router.js里给我的收藏添加一个meta对象，然后在main.js里用router.beforeEach判断就可以了。
+  有两个地方需要判断是否登录。一个是点击列表项的收藏按钮时，另一个是点击我的收藏，进入收藏页之前需要判断。登录成功后，打开浏览器，点击f12，在application下面cookies就多了两个字段，分别是用户名和密码的字段。我一开始的写的判断条件是document.cookie.length > 0，只要浏览器有cookies，就算是他登录了，后来发现这样不严谨，因为就算没登录，时不时也会多出两个我不认识的字段。所以改成了用localstorage。在登录成功后，把他返回的数据中，取一个叫errorCode的值存到localstorage里面，然后在点击收藏按钮的方法里判断一下这个errorCode是不是等于"0"就可以了。而进入收藏页的判断则是使用了导航守卫。首先在router.js里给我的收藏添加一个meta对象，然后在main.js里用router.beforeEach判断就可以了。
   
 ```
 {
