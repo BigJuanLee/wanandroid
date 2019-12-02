@@ -192,6 +192,7 @@ location /api {
 ```
 
 ### 手机上滑动的问题
+
   在电脑上用浏览器开发者模式预览是没什么问题的，但是用手机浏览器打开的话，发现滑动功能都失效了。对比了pc端和移动端的区别，发现在移动端下，浏览器多了自带的底部工具栏和顶部的地址栏，感觉是这两个地方导致我下拉条判断出错了。https://blog.csdn.net/weixin_36076584/article/details/79620534 ，应该是遇到和这篇文章相同的问题，里面也有解决方法。我在打包后的dist文件夹下面的index.html添了两行代码就行了。
   
 ```
@@ -199,7 +200,90 @@ location /api {
 <meta name="full-screen" content="yes">
 ```
 
+### 登录权限的问题
 
+  有两个地方需要判断是否登录。一个是点击列表项的收藏按钮时，另一个是点击我的收藏，进入收藏页之前需要判断。登录成功后，打开浏览器，点击f12，在application下面cookies就多了两个字段，分别是用户名和密码的字段。我一开始的写的判断条件是document.cookie.length > 0，只要浏览器有cookies，就算是他登录了，后来发现这样不严谨，因为就算没登录，时不时也会多出两个我不认识的字段。所以改成了用localstorage。在登录成功后，把他返回的数据中，取一个叫errorCode的值存到localstorage里面，然后在点击收藏按钮的方法里判断一下这个errorCode是不是等于"0"就可以了。而进入收藏页的判断则是使用了导航守卫。首先在router.js里给我的收藏添加一个meta对象，然后在main.js里用router.beforeEach判断就可以了。
+  
+```
+{
+      path: "/myCollection",
+      name: 'myCollection',
+      component: MyCollection,
+      meta: {
+        needLogin: true
+}
+```
+
+```
+router.beforeEach((to, from, next) => {
+  if(to.meta.needLogin) {
+    if(localStorage.getItem("token")) {
+      next();
+    } else {
+      next({
+        name: 'login'
+      })
+    }
+  } else {
+    next();
+  }
+})
+```
+
+```
+login() {
+      this.axios
+        .post(
+          `/user/login?username=${this.$refs.username.value}&password=${this.$refs.password.value}`
+        )
+        .then(res => {
+          if (res.data.errorMsg) {
+            alert(res.data.errorMsg);
+          } else {
+            localStorage.setItem("token", res.data.errorCode)
+            alert("登录成功");
+            this.$router.go(-1);
+          }
+        })
+        .catch(error => error);
+    }
+```
+
+```
+collection(list, id, oId) {
+      if (localStorage.getItem("token") === "0") {
+        if (this.$route.path == "/myCollection") {
+          this.axios
+            .post(`/lg/uncollect/${id}/json?originId=${oId}`)
+            .then(() => {
+              this.reload();
+            })
+            .catch(error => error);
+        } else {
+          if (list.collect) {
+            this.axios
+              .post(`/lg/uncollect_originId/${id}/json`)
+              .then(() => {
+                this.reload();
+              })
+              .catch(error => error);
+          } else {
+            this.axios
+              .post(`/lg/collect/${this.id}/json`)
+              .then(() => {
+                this.reload();
+              })
+              .catch(error => error);
+          }
+        }
+      } else {
+        alert("先登录才能收藏");
+        this.$router.push({
+          path: "/login"
+        });
+      }
+    }
+```
 
 ### 目前已知的问题
 
@@ -211,9 +295,9 @@ location /api {
 
 * axios请求大概的逻辑差不多，应该封装一下。
 
-* 判断登录不严谨。
+   ~~判断登录不严谨。~~
 
-* 没用路由守卫，需要先登录才能进入的页面部分的代码可以优化。
+   ~~没用路由守卫，需要先登录才能进入的页面部分的代码可以优化。~~
 
   ~~用手机体验首页存在加载不了更多的bug。~~
 
