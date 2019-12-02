@@ -9,9 +9,10 @@
       <div class="toLogin" @click="toLogin()"></div>
       <ul class="list-wrapper">
         <li class="list-item" @click="toMyCollection()">
-          <img class="star" src="@/assets/star.png" alt="">
+          <img class="star" src="@/assets/star.png" alt />
           <span>我的收藏</span>
         </li>
+        <li class="close" @click="quit()">退出登录</li>
       </ul>
     </div>
     <!-- <Tabs></Tabs> -->
@@ -30,13 +31,23 @@ export default {
   methods: {
     toLogin() {
       this.$router.push({
-        path: '/login'
-      })
+        path: "/login"
+      });
     },
     toMyCollection() {
       this.$router.push({
-        name: 'myCollection'
-      })
+        name: "myCollection"
+      });
+    },
+    quit() {
+      if (localStorage.getItem("token")) {
+        this.axios.get("/user/logout/json");
+        localStorage.removeItem("token");
+        alert('退出成功');
+      } else {
+        alert('还没登录');
+        return false;
+      }
     }
   }
 };
@@ -64,7 +75,7 @@ export default {
       }
       &::after {
         position: absolute;
-        content: '点击上方登录';
+        content: "点击上方登录";
         color: white;
         top: 17vh;
         left: 36vw;
@@ -84,13 +95,21 @@ export default {
         border-bottom: 1px solid #b2bec3;
         &::after {
           position: absolute;
-          content: '>';
+          content: ">";
           right: 2vw;
         }
         .star {
           height: 80%;
           margin-right: 2vw;
         }
+      }
+      .close {
+        text-align: center;
+        margin-top: 1px;
+        height: 8vh;
+        line-height: 8vh;
+        color: #03a9f4;
+        border-bottom: 1px solid #b2bec3;
       }
     }
   }
