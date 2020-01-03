@@ -33,7 +33,7 @@ wanandroid
 		
   这个是玩安卓开放的api，用于获取数据啊，做登录注册收藏各种功能。有了接口之后，就可以使用axios发起请求啦。首先要安装axios，在项目的终端输入 npm install axios。然后哪个页面需要用到的话，就在那里import一下，就可以使用了，但是这样太麻烦，如果很多个页面用到就需要import很多次。所以用到了vue-axios,同样先安装一下,npm install --save vue-axios，然后在main.js里面import，最后Vue.use(VueAxios, axios)这样，每次需要使用，就可以直接this.axios...这样使用了，不用再import了，方便了一些。
     
-  在请求数据的时候，这里随便选了一个接口，直接this.axios.get(`https://www.wanandroid.com/article/list/0/json`)是不行的，会报一个跨域的错误。解决方法是在项目的根目录下新建一个vue.config.js的文件，然后里面配置一下，然后请求的时候就改成this.axios.get(`/api/...`)这样，在开发环境下应该是没问题了。而在生产环境依旧是存在跨域问题的，也就是打包之后。
+  在请求数据的时候，这里随便选了一个接口，直接this.axios.get(`https://www.wanandroid.com/article/list/0/json`)是不行的，会报一个跨域的错误。解决方法是在项目的根目录下新建一个vue.config.js的文件，然后里面配置一下，然后请求的时候就改成this.axios.get(`/api/...`)这样，在开发环境下应该是没问题了。而在生产环境依旧是存在跨域问题的。
   
 ```module.exports = {
     publicPath: './',
@@ -173,7 +173,6 @@ clear() {
 }
 ```
 
-制作的难点好像就这些，主要还是跨域的问题。
 
 
 ### 生产环境下的跨域问题
@@ -182,7 +181,6 @@ clear() {
   
   然后再次经过多方查证和百度过后，发现是生产环境下的跨域问题，而百度上解决这个问题的方案很多，我尝试过最后成功的就只有一个，就是使用nginx。要去nginx官网下载一个最新版本，然后修改一下conf文件夹里面的nginx.conf配置，接着把打包好的dist文件夹丢到nginx文件夹根目录下，开启服务，大功告成！！！
   
-  小插曲，其实一开始用nginx，死活开启不了服务，无论通过命令行还是双击exe都不行，任务管理器依旧没这个进程。后来找到一个大手子，他发了他的nginx压缩包给我就能开启服务了，很奇怪。然后解决了这个跨域问题的目的是想演示，我就买了个服务器，然后把整个配置好的nginx文件夹，包括已经把dist包也放进去这样，整个复制到了服务器上，然后输入公网ip就能演示了，建议用谷歌浏览器打开然后按一下f12。至于为什么一开始是说要用github page，后面又突然使用了服务器，因为大手子说服务器好啊，直接丢到服务器上就能演示了，就听了他的话......毕竟这个生产环境下的跨域问题不是我自己解决的，我尝试了百度上很多办法，例如jsonp，或者下载些什么插件统统不行，万念俱灰就快放弃的时候大手子拯救了我，所以我很相信他的话。就是这样。
   
 ```
 location /api {
@@ -200,100 +198,31 @@ location /api {
 <meta name="full-screen" content="yes">
 ```
 
-### 登录权限的问题
+### 登录问题
 
-  有两个地方需要判断是否登录。一个是点击列表项的收藏按钮时，另一个是点击我的收藏，进入收藏页之前需要判断。登录成功后，打开浏览器，点击f12，在application下面cookies就多了两个字段，分别是用户名和密码的字段。我一开始的写的判断条件是document.cookie.length > 0，只要浏览器有cookies，就算是他登录了，后来发现这样不严谨，因为就算没登录，时不时也会多出两个我不认识的字段。所以改成了用localstorage。在登录成功后，把他返回的数据中，取一个叫errorCode的值存到localstorage里面，然后在点击收藏按钮的方法里判断一下这个errorCode是不是等于"0"就可以了。而进入收藏页的判断则是使用了导航守卫。首先在router.js里给我的收藏添加一个meta对象，然后在main.js里用router.beforeEach判断就可以了。
-  
-```
-{
-      path: "/myCollection",
-      name: 'myCollection',
-      component: MyCollection,
-      meta: {
-        needLogin: true
-}
-```
+  vue版本，使用axios请求登录接口后，返回的数据是{data:{...}, errorCode: 0, errorMsg: ''},小程序版本还多了一个cookies和header，而这个header里面有个set-header，要把这个字段放在请求头里才能验证登录与否。浏览器没有返回header，所以会出现一点问题，什么时候过期了也不清楚。
 
-```
-router.beforeEach((to, from, next) => {
-  if(to.meta.needLogin) {
-    if(localStorage.getItem("token")) {
-      next();
-    } else {
-      next({
-        name: 'login'
-      })
-    }
-  } else {
-    next();
-  }
-})
-```
 
-```
-login() {
-      this.axios
-        .post(
-          `/user/login?username=${this.$refs.username.value}&password=${this.$refs.password.value}`
-        )
-        .then(res => {
-          if (res.data.errorMsg) {
-            alert(res.data.errorMsg);
-          } else {
-            localStorage.setItem("token", res.data.errorCode)
-            alert("登录成功");
-            this.$router.go(-1);
-          }
-        })
-        .catch(error => error);
-    }
-```
-
-```
-collection(list, id, oId) {
-      if (localStorage.getItem("token") === "0") {
-        if (this.$route.path == "/myCollection") {
-          this.axios
-            .post(`/lg/uncollect/${id}/json?originId=${oId}`)
-            .then(() => {
-              this.reload();
-            })
-            .catch(error => error);
-        } else {
-          if (list.collect) {
-            this.axios
-              .post(`/lg/uncollect_originId/${id}/json`)
-              .then(() => {
-                this.reload();
-              })
-              .catch(error => error);
-          } else {
-            this.axios
-              .post(`/lg/collect/${this.id}/json`)
-              .then(() => {
-                this.reload();
-              })
-              .catch(error => error);
-          }
-        }
-      } else {
-        alert("先登录才能收藏");
-        this.$router.push({
-          path: "/login"
-        });
-      }
-    }
-```
 
 ### 目前已知的问题
 
-* 点击跳转到外部链接后，点击浏览器的返回键，底部的tab栏有时会对应不上。
+  ~~* 点击跳转到外部链接后，点击浏览器的返回键，底部的tab栏有时会对应不上。
+  
+  (小程序版没有这种问题)
+  
 
-* 跳转到外部链接后，返回功能没做。
+  ~~* 跳转到外部链接后，返回功能没做。
+  
+  (小程序版用webview完美实现)
+  
 
-* 点击收藏按钮的时候，页面必须刷新一下才能看见心形图标变蓝，用户体验不好。
+  ~~* 点击收藏按钮的时候，页面必须刷新一下才能看见心形图标变蓝，用户体验不好。
+  
+  (小程序版本使用setdata完美局部刷新，vue版局部刷新，经过百度就是用this.reload()的)
 
-* axios请求大概的逻辑差不多，应该封装一下。
+  ~~* axios请求大概的逻辑差不多，应该封装一下。
+  
+  (小程序版本稍微封装了一下)
 
    ~~判断登录不严谨。~~
 
@@ -301,13 +230,19 @@ collection(list, id, oId) {
 
   ~~用手机体验首页存在加载不了更多的bug。~~
 
-* 用手机需要输入的时候，输入法会把页面挤变形。
+  ~~* 用手机需要输入的时候，输入法会把页面挤变形。
+  
+  （换一种简约的方式，就放两个input一个button，在小程序版实现了）
 
+
+  ~~* 退出登录功能没做。
+  
 * 轮播图太简易了。
 
-* 退出登录功能没做。
-
-* 元素的出现动画没做，一些点击动画也没做
+* 元素的出现动画没做，一些点击动画也没做。
+（以上两个准备使用element-ui解决）
 
 ### 最后
-哇，总结了好多问题和bug，或许还有我不知道的。之前还做了一款知乎日报，用了better-scroll，丝般顺滑，无论在pc端还是移动端都毫无问题，这次尝试不用插件在移动端就出现了预期之外的问题，而且没什么头绪。还有轮播图也太简单了，明明有很多插件可以用的，都没用。我想如果在工作之中的话，还是要以完成任务为先，能用插件就用插件了，自己写的话，一是没别人好，二是写得慢，只有在平时自己做着玩的时候才手写吧。
+~~哇，总结了好多问题和bug，或许还有我不知道的。之前还做了一款知乎日报，用了better-scroll，丝般顺滑，无论在pc端还是移动端都毫无问题，这次尝试不用插件在移动端就出现了预期之外的问题，而且没什么头绪。还有轮播图也太简单了，明明有很多插件可以用的，都没用。我想如果在工作之中的话，还是要以完成任务为先，能用插件就用插件了，自己写的话，一是没别人好，二是写得慢，只有在平时自己做着玩的时候才手写吧。
+
+有一次面试，别人问你用过ui框架吗？咦，这和我平时听见的有所不同啊，我听大神都是说什么都要手写，怎么面试还问会不会用框架呢？既然这样的话，那还是稍微学着用一下吧。
