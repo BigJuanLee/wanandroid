@@ -200,7 +200,9 @@ location /api {
 
 ### 登录问题
 
-  vue版本，使用axios请求登录接口后，返回的数据是{data:{...}, errorCode: 0, errorMsg: ''},小程序版本还多了一个cookies和header，而这个header里面有个set-header，要把这个字段放在请求头里才能验证登录与否。浏览器没有返回header，所以会出现一点问题，什么时候过期了也不清楚。
+  ~~vue版本，使用axios请求登录接口后，返回的数据是{data:{...}, errorCode: 0, errorMsg: ''},小程序版本还多了一个cookies和header，而这个header里面有个set-header，要把这个字段放在请求头里才能验证登录与否。浏览器没有返回header，所以会出现一点问题，什么时候过期了也不清楚。
+  
+  浏览器请求登录接口后，会得到一串cookie，包含这用户名和密码"Hm_lvt_90501e13a75bb5eb3d067166e8d2cad8=1570047747; loginUserName=921456177; token_pass=37831f0dbc75ec9c302f14a423dd1edc"大概长这个样，所以判断这个字符串里面有没有loginUserName就可以判断是否登录了。获取cookie的方法是document.cookie,判断字符串是否含有子串是.includes()。
 
 
 
