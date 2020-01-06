@@ -11,10 +11,11 @@ Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 
 axios.defaults.baseURL = '/api/'
+axios.defaults.withCredentials = true
 
 router.beforeEach((to, from, next) => {
-  if(to.meta.needLogin) {
-    if(localStorage.getItem("token")) {
+  if (to.meta.needLogin) {
+    if (document.cookie.includes('loginUserName')) {
       next();
     } else {
       next({

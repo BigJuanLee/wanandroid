@@ -24,8 +24,6 @@ export default {
           if (res.data.errorMsg) {
             alert(res.data.errorMsg);
           } else {
-            localStorage.setItem("token", res.data.errorCode)
-            console.log(document.cookie);
             alert("登录成功");
             this.$router.go(-1);
           }
