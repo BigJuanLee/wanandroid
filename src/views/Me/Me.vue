@@ -6,7 +6,11 @@
       </template>
     </Header>
     <div class="content-wrapper">
-      <div class="toLogin" @click="toLogin()"></div>
+      <div class="loginWrapper">
+        <div class="toLogin" @click="toLogin()"></div>
+        <span class="tips" v-if="!this.getNickname()">点击上方登录</span>
+        <span class="tips" v-else>{{nickname}}</span>
+      </div>
       <ul class="list-wrapper">
         <li class="list-item" @click="toMyCollection()">
           <img class="star" src="@/assets/star.png" alt />
@@ -22,8 +26,11 @@
 <script>
 import Header from "@/components/Header/Header";
 export default {
+  inject: ["reload"],
   data() {
-    return {};
+    return {
+      nickname: this.getNickname()
+    };
   },
   components: {
     Header
@@ -40,14 +47,25 @@ export default {
       });
     },
     quit() {
-      if (localStorage.getItem("token")) {
+      if (document.cookie.includes("loginUserName")) {
         this.axios.get("/user/logout/json");
-        localStorage.removeItem("token");
-        alert('退出成功');
+        window.localStorage.removeItem("nickname");
+        alert("退出成功");
+        this.reload();
       } else {
-        alert('还没登录');
+        alert("还没登录");
         return false;
       }
+    },
+    // isLogin() {
+    //   if (document.cookie.includes("loginUserName")) {
+    //     return true;
+    //   }
+    //   return false;
+    // },
+    getNickname() {
+      let result = window.localStorage.getItem("nickname");
+      return result;
     }
   }
 };
@@ -57,29 +75,43 @@ export default {
 .me {
   .content-wrapper {
     height: 86vh;
-    .toLogin {
+    .loginWrapper {
       height: 30vh;
       background-color: #03a9f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       position: relative;
-      pointer-events: none;
-      &::before {
-        position: absolute;
-        width: 60px;
-        height: 60px;
-        content: "";
+      // pointer-events: none;
+      .toLogin {
+        width: 50px;
+        height: 50px;
         background-color: white;
         border-radius: 50%;
-        top: 5vh;
-        left: 40vw;
-        pointer-events: auto;
       }
-      &::after {
-        position: absolute;
-        content: "点击上方登录";
+      .tips {
         color: white;
-        top: 17vh;
-        left: 36vw;
+        position: absolute;
+        bottom: 20px;
       }
+      // &::before {
+      //   position: absolute;
+      //   width: 60px;
+      //   height: 60px;
+      //   content: "";
+      //   background-color: white;
+      //   border-radius: 50%;
+      //   top: 5vh;
+      //   left: 40vw;
+      //   pointer-events: auto;
+      // }
+      // &::after {
+      //   position: absolute;
+      //   content: "点击上方登录";
+      //   color: white;
+      //   top: 17vh;
+      //   left: 36vw;
+      // }
     }
     .list-wrapper {
       list-style: none;

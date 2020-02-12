@@ -1,7 +1,14 @@
 <template>
   <div class="login-box">
     <h3 class="title">Login</h3>
-    <input class="input" type="text" autocomplete="off" id="username" ref="username" placeholder="username" />
+    <input
+      class="input"
+      type="text"
+      autocomplete="off"
+      id="username"
+      ref="username"
+      placeholder="username"
+    />
     <input class="input" type="password" id="password" ref="password" placeholder="password" />
     <button class="submit" type="submit" id="submit" @click="login()">GO</button>
     <span class="tips">forgot_your_password</span>
@@ -25,6 +32,7 @@ export default {
             alert(res.data.errorMsg);
           } else {
             alert("登录成功");
+            window.localStorage.setItem("nickname", res.data.data.nickname);
             this.$router.go(-1);
           }
         })

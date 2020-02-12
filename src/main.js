@@ -5,8 +5,18 @@ import store from './store'
 import "normalize.css"
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import Tabs from "@/components/Tabs/Tabs";
-Vue.component('Tabs', Tabs)
+import myTabs from "@/components/myTabs/myTabs";
+Vue.component('myTabs', myTabs)
+import {
+  Tabs,
+  TabPane,
+  Carousel,
+  CarouselItem
+} from 'element-ui'
+Vue.use(Tabs);
+Vue.use(TabPane);
+Vue.use(Carousel);
+Vue.use(CarouselItem);
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 

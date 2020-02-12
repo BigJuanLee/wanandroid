@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view v-if="isRouterAlive"></router-view>
-    <Tabs></Tabs>
+    <myTabs></myTabs>
   </div>
 </template>
 
@@ -32,6 +32,6 @@ export default {
 <style>
 #app {
   height: 100vh;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 </style>
