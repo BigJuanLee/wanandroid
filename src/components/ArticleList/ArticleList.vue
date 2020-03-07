@@ -11,7 +11,7 @@
       <span>{{list.chapterName}}</span>
       <i @click.stop="collection(list, list.id, list.originId)">
         <img
-          :src="list.collect ? require('@/assets/collected.png') : require('@/assets/not-collected.png')"
+          :src="this.collect ? require('@/assets/collected.png') : require('@/assets/not-collected.png')"
           alt
         />
       </i>
@@ -21,9 +21,11 @@
 
 <script>
 export default {
-  inject: ["reload"],
+  // inject: ["reload"],
   data() {
-    return {};
+    return {
+      collect: this.list.collect
+    };
   },
   props: {
     list: Object,
@@ -32,12 +34,13 @@ export default {
   components: {},
   methods: {
     collection(list, id, oId) {
-      if (document.cookie.includes('loginUserName')) {
+      if (document.cookie.includes("loginUserName")) {
         if (this.$route.path == "/myCollection") {
           this.axios
             .post(`/lg/uncollect/${id}/json?originId=${oId}`)
             .then(() => {
-              this.reload();
+              this.collect = !this.collect;
+              // this.reload();
             })
             .catch(error => error);
         } else {
@@ -45,14 +48,16 @@ export default {
             this.axios
               .post(`/lg/uncollect_originId/${id}/json`)
               .then(() => {
-                this.reload();
+                this.collect = !this.collect;
+                // this.reload();
               })
               .catch(error => error);
           } else {
             this.axios
               .post(`/lg/collect/${this.id}/json`)
               .then(() => {
-                this.reload();
+                this.collect = !this.collect;
+                // this.reload();
               })
               .catch(error => error);
           }
@@ -66,7 +71,7 @@ export default {
     },
     toArticle(link) {
       window.location.href = link; //跳到外链
-    },
+    }
   }
 };
 </script>

@@ -11,12 +11,14 @@ import {
   Tabs,
   TabPane,
   Carousel,
-  CarouselItem
+  CarouselItem,
+  Icon
 } from 'element-ui'
 Vue.use(Tabs);
 Vue.use(TabPane);
 Vue.use(Carousel);
 Vue.use(CarouselItem);
+Vue.use(Icon);
 Vue.use(VueAxios, axios)
 Vue.config.productionTip = false
 

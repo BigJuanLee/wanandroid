@@ -11,12 +11,11 @@
     </li>
   </ul>-->
   <el-tabs v-model="activeName" stretch tab-position="bottom" @tab-click="handleClick">
-    <el-tab-pane
-      v-for="(item, index) in listArray"
-      :key="index"
-      :name="item.content"
-      :label="item.content"
-    >
+    <el-tab-pane v-for="(item, index) in listArray" :key="index" :name="item.content">
+      <div slot="label" class="content">
+        <i :class="item.className"></i>
+        <span>{{item.content}}</span>
+      </div>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -27,30 +26,30 @@ export default {
     return {
       listArray: [
         {
-          // className: "home-page",
+          className: "el-icon-s-platform",
           // imgUrl: require("@/assets/home.png"),
-          activeUrl: require("@/assets/home-active.png"),
+          // activeUrl: require("@/assets/home-active.png"),
           content: "home",
           name: "home"
         },
         {
-          // className: "knowledge",
+          className: "el-icon-s-order",
           // imgUrl: require("@/assets/knowledge.png"),
-          activeUrl: require("@/assets/knowledge-active.png"),
+          // activeUrl: require("@/assets/knowledge-active.png"),
           content: "knowledge",
           name: "knowledge"
         },
         {
-          // className: "hot",
+          className: "el-icon-sunny",
           // imgUrl: require("@/assets/hot.png"),
-          activeUrl: require("@/assets/hot-active.png"),
+          // activeUrl: require("@/assets/hot-active.png"),
           content: "hot",
           name: "hot"
         },
         {
-          // className: "me",
+          className: "el-icon-user",
           // imgUrl: require("@/assets/me.png"),
-          activeUrl: require("@/assets/me-active.png"),
+          // activeUrl: require("@/assets/me-active.png"),
           content: "me",
           name: "me"
         }
@@ -67,17 +66,20 @@ export default {
     //     name
     //   });
     // },
-    handleClick(tab, event) {
+    handleClick(tab) {
       let name = tab.paneName;
       this.$router.push({
         name
       });
     }
-  },
+  }
 };
 </script>
 
 <style lang="scss">
+.content {
+  padding-left: 5px;
+}
 // .tabs {
 //   height: 7vh;
 //   border: 1px solid #dfe6e9;
