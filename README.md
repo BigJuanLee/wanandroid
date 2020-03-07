@@ -205,6 +205,10 @@ location /api {
   ~~vue版本，使用axios请求登录接口后，返回的数据是{data:{...}, errorCode: 0, errorMsg: ''},小程序版本还多了一个cookies和header，而这个header里面有个set-header，要把这个字段放在请求头里才能验证登录与否。浏览器没有返回header，所以会出现一点问题，什么时候过期了也不清楚。~~
   
   浏览器请求登录接口后，会得到一串cookie，包含这用户名和密码"Hm_lvt_90501e13a75bb5eb3d067166e8d2cad8=1570047747; loginUserName=921456177; token_pass=37831f0dbc75ec9c302f14a423dd1edc"大概长这个样，所以判断这个字符串里面有没有loginUserName就可以判断是否登录了。获取cookie的方法是document.cookie,判断字符串是否含有子串是.includes()。
+  
+### 点击收藏按钮问题
+
+  文章列表是一个子组件，它的收藏状态是由父组件传进来的，用props接收。收藏按钮判断是否高亮度时候，v-if不能直接使用props的状态，要先在data声明一个变量，赋值给它，然后根据这个变量判断，不然不会实时更新。
 
 
 
@@ -222,7 +226,7 @@ location /api {
 
   ~~点击收藏按钮的时候，页面必须刷新一下才能看见心形图标变蓝，用户体验不好。~~
   
-  (小程序版本使用setdata完美局部刷新，vue版局部刷新，经过百度就是用this.reload()的)
+  ~~(小程序版本使用setdata完美局部刷新，vue版局部刷新，经过百度就是用this.reload()的)~~
   
 
   ~~axios请求大概的逻辑差不多，应该封装一下。~~
